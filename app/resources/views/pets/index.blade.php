@@ -18,21 +18,21 @@
             </form>
         </div>
     </div>
+
     @if(count($pets) > 0)
         <div class="row">
             @foreach($pets as $pet)
                 <div class="col-md-4 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">{{ $pet['name'] ?? 'Brak nazwy' }}</h5>
+                            <h5 class="card-title">{{ $pet->name ?? 'Brak nazwy' }}</h5>
                             <p class="card-text">
-                                Status: <b>{{ $pet['status'] ?? 'Nieznany' }}</b>
-                           <br>
-                                Kategoria: {{ $pet['category']['name'] ?? '-' }}
+                                Status: <b>{{ $pet->status ?? 'Nieznany' }}</b><br>
+                                Kategoria: {{ $pet->category->name ?? '-' }}
                             </p>
                             <div class="d-flex gap-2">
-                                <a href="{{ route('pets.edit', $pet['id']) }}" class="btn btn-primary btn-sm">Edytuj</a>
-                                <form action="{{ route('pets.destroy', $pet['id']) }}" method="POST">
+                                <a href="{{ route('pets.edit', $pet->id) }}" class="btn btn-primary btn-sm">Edytuj</a>
+                                <form action="{{ route('pets.destroy', $pet->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm">Usuń</button>

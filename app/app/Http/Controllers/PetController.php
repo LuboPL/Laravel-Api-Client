@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Config\ConfigInterface;
+use App\Http\Requests\PetStoreRequest;
 use App\Service\PayloadMapper;
 use App\Validator\PayloadValidator;
 use Illuminate\Contracts\View\Factory;
@@ -10,33 +12,34 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
+use Webmozart\Assert\InvalidArgumentException;
 
 class PetController extends Controller
 {
-    private string $apiUrl = 'https://petstore.swagger.io/v2/pet';
-
     public function __construct(
         private readonly PayloadMapper $payloadMapper,
         private readonly PayloadValidator $payloadValidator,
+        private readonly PetStoreRequest $petStoreRequest,
+        private readonly ConfigInterface $config
     )
     {
     }
 
-    public function index(Request $request): View|Factory
+    public function index(Request $request): View|RedirectResponse
     {
         $selectedStatus = $request->input('status', 'available');
+        try {
+            $response = $this->petStoreRequest->getPetsByStatus($selectedStatus);
+            $pets = $this->payloadMapper->mapPetsFromResponse($response);
 
-        $response = Http::get($this->apiUrl . '/findByStatus', [
-            'status' => $selectedStatus
-        ]);
-
-        $pets = $response->successful() ? $response->json() : [];
-
-        return view('pets.index', [
-            'pets' => $pets,
-            'availableStatuses' => ['available', 'pending', 'sold'],
-            'selectedStatus' => $selectedStatus
-        ]);
+            return view('pets.index', [
+                'pets' => $pets,
+                'availableStatuses' => $this->config->getAvailableStatuses(),
+                'selectedStatus' => $selectedStatus
+            ]);
+        } catch (\Throwable $exception) {
+            return redirect()->back()->with('error', $exception->getMessage());
+        }
     }
 
     public function create(): View|Factory
@@ -46,52 +49,29 @@ class PetController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-//        $request->validate([
-//            'category.name' => 'required|string',
-//            'name' => 'required|string',
-//            'photoUrls.*' => 'nullable|url',
-//            'tags.*.name' => 'nullable|string',
-//            'status' => 'required|in:available,pending,sold',
-//        ]);
+        $payload = $request->toArray();
+
         try {
-            $pet = $this->payloadMapper->mapPetFromRequest($request);
-            $response = Http::post($this->apiUrl, $pet->getPreparedData());
+            $this->payloadValidator->validatePetPayload($request);
+            $pet = $this->payloadMapper->mapPetFromArray($payload);
+            $response = $this->petStoreRequest->postNewPet($pet);
 
             if (false === $response->successful()) {
                 return redirect()->back()->with('error', 'Błąd API: ' . $response->body());
             }
             return redirect()->back()->with('success', 'Zwierzak został dodany!');
 
-        } catch (\Throwable $exception) {
-            return redirect()->back()->with('error', 'Błąd połączenia: ' . $exception->getMessage());
+        } catch (InvalidArgumentException|\Throwable $exception) {
+            return redirect()->back()->with('error', $exception->getMessage());
         }
-
-//
-//        $data = [
-//            'category' => [
-//                'name' => $request->input('category.name'),
-//            ],
-//            'name' => $request->input('name'),
-//            'photoUrls' => $request->input('photoUrls'),
-//            'tags' => collect($request->input('tags'))->filter(function ($tag) {
-//                return !empty($tag['name']);
-//            })->values()->toArray(),
-//            'status' => $request->input('status'),
-//        ];
-//
-//        try {
-//
-//
-//        } catch (\Exception $e) {
-//        }
     }
 
     public function edit($id): mixed
     {
-        $response = Http::get($this->apiUrl . '/' . $id);
+        $response = $this->petStoreRequest->getPetById((int)$id);
 
         if ($response->successful()) {
-            return view('pets.create', ['pet' => $response->json()]);
+            return view('pets.create', ['pet' => $this->payloadMapper->mapPetFromArray($response->json())]);
         }
 
         return redirect()->route('pets.index')->with('error', 'Nie znaleziono zwierzęcia');
@@ -99,9 +79,9 @@ class PetController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $data = $this->prepareData($request);
+        $pet = $this->payloadMapper->mapPetFromArray($request->array());
 
-        $response = Http::put($this->apiUrl, $data);
+        $response = $this->petStoreRequest->putPet($pet);
 
         if ($response->successful()) {
             return redirect()->route('pets.index')->with('success', 'Zaktualizowano pomyślnie!');
