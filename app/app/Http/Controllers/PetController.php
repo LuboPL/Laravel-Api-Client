@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Config\ConfigInterface;
-use App\Http\Requests\PetStoreRequest;
+use App\Service\Factory\RequestFactoryInterface;
 use App\Service\PayloadMapper;
 use App\Validator\PayloadValidator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 use Webmozart\Assert\InvalidArgumentException;
 
@@ -19,7 +18,7 @@ class PetController extends Controller
     public function __construct(
         private readonly PayloadMapper $payloadMapper,
         private readonly PayloadValidator $payloadValidator,
-        private readonly PetStoreRequest $petStoreRequest,
+        private readonly RequestFactoryInterface $petStoreRequest,
         private readonly ConfigInterface $config
     )
     {
@@ -27,18 +26,21 @@ class PetController extends Controller
 
     public function index(Request $request): View|RedirectResponse
     {
-        $selectedStatus = $request->input('status', 'available');
         try {
-            $response = $this->petStoreRequest->getPetsByStatus($selectedStatus);
+            $request = $this->petStoreRequest->create($request);
+            $response = $request->create();
             $pets = $this->payloadMapper->mapPetsFromResponse($response);
 
             return view('pets.index', [
                 'pets' => $pets,
                 'availableStatuses' => $this->config->getAvailableStatuses(),
-                'selectedStatus' => $selectedStatus
+                'selectedStatus' => $request->getStatus()
             ]);
         } catch (\Throwable $exception) {
-            return redirect()->back()->with('error', $exception->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', $exception->getMessage()
+                );
         }
     }
 
@@ -49,71 +51,89 @@ class PetController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $payload = $request->toArray();
-
         try {
-            $this->payloadValidator->validatePetPayload($request);
-            $pet = $this->payloadMapper->mapPetFromArray($payload);
-            $response = $this->petStoreRequest->postNewPet($pet);
+            $this->payloadValidator->validateNewPetPayload($request);
+            $request = $this->petStoreRequest->create($request);
+            $response = $request->create();
 
             if (false === $response->successful()) {
-                return redirect()->back()->with('error', 'Błąd API: ' . $response->body());
+                return redirect()
+                    ->back()
+                    ->with('error', $response->body());
             }
-            return redirect()->back()->with('success', 'Zwierzak został dodany!');
-
+            return redirect()
+                ->back()
+                ->with('success', 'Pet added successfully!');
         } catch (InvalidArgumentException|\Throwable $exception) {
-            return redirect()->back()->with('error', $exception->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', $exception->getMessage());
         }
     }
 
-    public function edit($id): mixed
+    public function edit(Request $request): mixed
     {
-        $response = $this->petStoreRequest->getPetById((int)$id);
+        try {
+            $request = $this->petStoreRequest->create($request);
+            $response = $request->create();
+            if ($response->successful()) {
+                return view(
+                    'pets.create',
+                    [
+                        'pet' => $this->payloadMapper->mapPetFromArray($response->json())
+                    ]
+                );
+            }
 
-        if ($response->successful()) {
-            return view('pets.create', ['pet' => $this->payloadMapper->mapPetFromArray($response->json())]);
+        } catch (InvalidArgumentException|\Throwable $exception) {
+            return redirect()
+                ->back()
+                ->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('pets.index')->with('error', 'Nie znaleziono zwierzęcia');
+        return redirect()
+            ->route('pets.index')
+            ->with('error', 'Not found pet');
     }
 
     public function update(Request $request): RedirectResponse
     {
-        $pet = $this->payloadMapper->mapPetFromArray($request->array());
+        try {
+            $this->payloadValidator->validateUpdatedPetPayload($request);
+            $request = $this->petStoreRequest->create($request);
+            $response = $request->create();
 
-        $response = $this->petStoreRequest->putPet($pet);
+            if ($response->successful()) {
+                return redirect()
+                    ->route('pets.index')
+                    ->with('success', 'Pet updated successfully!');
+            }
 
-        if ($response->successful()) {
-            return redirect()->route('pets.index')->with('success', 'Zaktualizowano pomyślnie!');
+            return back()
+                ->with('error', $response->body());
+
+        } catch (InvalidArgumentException|\Throwable $exception) {
+            return back()
+                ->with('error', $exception->getMessage());
         }
-
-        return back()->with('error', 'Błąd aktualizacji: ' . $response->body());
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy(Request $request): RedirectResponse
     {
-        $response = Http::delete($this->apiUrl . '/' . $id);
-
-        if ($response->successful()) {
-            return redirect()->route('pets.index')->with('success', 'Usunięto pomyślnie!');
+        try {
+            $request = $this->petStoreRequest->create($request);
+            $response = $request->create();
+            if ($response->successful()) {
+                return redirect()
+                    ->route('pets.index')
+                    ->with('success', 'Pet deleted successfully!');
+            }
+        } catch (InvalidArgumentException|\Throwable $exception) {
+            return back()
+                ->with('error', $exception->getMessage());
         }
 
-        return back()->with('error', 'Błąd usuwania: ' . $response->body());
-    }
-
-    private function prepareData(Request $request): array
-    {
-        return [
-            'id' => $request->input('id'),
-            'category' => [
-                'name' => $request->input('category.name')
-            ],
-            'name' => $request->input('name'),
-            'photoUrls' => $request->input('photoUrls'),
-            'tags' => array_filter(array_map(function($tag) {
-                return ['name' => $tag['name']];
-            }, $request->input('tags') ?? [])),
-            'status' => $request->input('status')
-        ];
+        return back()
+            ->with('error', $response->body());
     }
 }

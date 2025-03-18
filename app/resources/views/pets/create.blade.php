@@ -7,9 +7,15 @@
         @csrf
         @if(isset($pet)) @method('PUT') @endif
 
+        @if(isset($pet))
+            <input type="hidden" name="id" value="{{ $pet->id }}">
+            <input type="hidden" name="category[id]" value="{{ $pet->category->id }}">
+
+        @endif
+
         <div class="mb-3">
             <label class="form-label">Nazwa kategorii</label>
-            <input type="text" name="category" class="form-control"
+            <input type="text" name="category[name]" class="form-control"
                    value="{{ $pet->category->name ?? '' }}" required>
         </div>
 
