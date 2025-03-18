@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Service\PayloadMapper;
+use App\Validator\PayloadValidator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,6 +14,13 @@ use Illuminate\View\View;
 class PetController extends Controller
 {
     private string $apiUrl = 'https://petstore.swagger.io/v2/pet';
+
+    public function __construct(
+        private readonly PayloadMapper $payloadMapper,
+        private readonly PayloadValidator $payloadValidator,
+    )
+    {
+    }
 
     public function index(Request $request): View|Factory
     {
@@ -37,37 +46,44 @@ class PetController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'category.name' => 'required|string',
-            'name' => 'required|string',
-            'photoUrls.*' => 'nullable|url',
-            'tags.*.name' => 'nullable|string',
-            'status' => 'required|in:available,pending,sold',
-        ]);
-
-        $data = [
-            'category' => [
-                'name' => $request->input('category.name'),
-            ],
-            'name' => $request->input('name'),
-            'photoUrls' => $request->input('photoUrls'),
-            'tags' => collect($request->input('tags'))->filter(function ($tag) {
-                return !empty($tag['name']);
-            })->values()->toArray(),
-            'status' => $request->input('status'),
-        ];
-
+//        $request->validate([
+//            'category.name' => 'required|string',
+//            'name' => 'required|string',
+//            'photoUrls.*' => 'nullable|url',
+//            'tags.*.name' => 'nullable|string',
+//            'status' => 'required|in:available,pending,sold',
+//        ]);
         try {
-            $response = Http::post($this->apiUrl, $data);
+            $pet = $this->payloadMapper->mapPetFromRequest($request);
+            $response = Http::post($this->apiUrl, $pet->getPreparedData());
 
-            if ($response->successful()) {
-                return redirect()->back()->with('success', 'Zwierzak został dodany!');
-            } else {
+            if (false === $response->successful()) {
                 return redirect()->back()->with('error', 'Błąd API: ' . $response->body());
             }
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Błąd połączenia: ' . $e->getMessage());
+            return redirect()->back()->with('success', 'Zwierzak został dodany!');
+
+        } catch (\Throwable $exception) {
+            return redirect()->back()->with('error', 'Błąd połączenia: ' . $exception->getMessage());
         }
+
+//
+//        $data = [
+//            'category' => [
+//                'name' => $request->input('category.name'),
+//            ],
+//            'name' => $request->input('name'),
+//            'photoUrls' => $request->input('photoUrls'),
+//            'tags' => collect($request->input('tags'))->filter(function ($tag) {
+//                return !empty($tag['name']);
+//            })->values()->toArray(),
+//            'status' => $request->input('status'),
+//        ];
+//
+//        try {
+//
+//
+//        } catch (\Exception $e) {
+//        }
     }
 
     public function edit($id): mixed

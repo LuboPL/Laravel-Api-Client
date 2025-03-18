@@ -8,14 +8,9 @@
         @if(isset($pet)) @method('PUT') @endif
 
         <div class="mb-3">
-            <label class="form-label">ID zwierzaka</label>
-            <input type="number" name="id" class="form-control" value="{{ $pet['id'] ?? '' }}" required>
-        </div>
-
-        <div class="mb-3">
             <label class="form-label">Nazwa kategorii</label>
-            <input type="text" name="category[name]" class="form-control"
-                   value="{{ $pet['category']['name'] ?? '' }}" required>
+            <input type="text" name="category" class="form-control"
+                   value="{{ $pet['category'] ?? '' }}" required>
         </div>
 
         <div class="mb-3">
@@ -29,7 +24,7 @@
             <div id="photoUrlsContainer">
                 @foreach(($pet['photoUrls'] ?? ['']) as $url)
                     <input type="url" name="photoUrls[]" class="form-control mb-2"
-                           value="{{ $url }}">
+                           value="{{ $url }}" required>
                 @endforeach
             </div>
             <button type="button" class="btn btn-secondary btn-sm" onclick="addPhotoUrlField()">Dodaj zdjęcie</button>
