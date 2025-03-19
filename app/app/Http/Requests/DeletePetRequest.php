@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
@@ -13,13 +14,18 @@ readonly class DeletePetRequest implements RequestInterface
         private string $method,
         private string $apiUrl,
         private string $status,
+        private string $apiKey
     )
     {
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function create(): Response
     {
-        return Http::delete($this->getUri());
+        return Http::withHeaders(['api_key' => $this->apiKey])
+            ->delete($this->getUri());
     }
 
     public function getMethod(): string

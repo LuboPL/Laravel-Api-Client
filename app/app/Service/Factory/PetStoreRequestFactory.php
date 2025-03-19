@@ -69,7 +69,8 @@ readonly class PetStoreRequestFactory implements RequestFactoryInterface
                     (int)$request->route()->parameter('pet'),
                     $method,
                     $this->config->getApiUrl(),
-                    $request->get('status') ?? ''
+                    $request->get('status') ?? '',
+                    $this->config->getApiKey()
                 ),
                 default => throw new PetStoreException('Method not allowed'),
             },

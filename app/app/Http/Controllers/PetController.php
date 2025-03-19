@@ -39,8 +39,7 @@ class PetController extends Controller
         } catch (\Throwable $exception) {
             return redirect()
                 ->back()
-                ->with('error', $exception->getMessage()
-                );
+                ->with('error', $exception->getMessage());
         }
     }
 

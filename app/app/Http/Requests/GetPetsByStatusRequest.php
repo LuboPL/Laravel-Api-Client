@@ -15,8 +15,8 @@ readonly class GetPetsByStatusRequest implements RequestInterface
         private string $status
     )
     {
-
     }
+
     public function create(): Response
     {
         return Http::get(
