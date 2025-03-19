@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Webmozart\Assert\Assert;
 use Webmozart\Assert\InvalidArgumentException;
 
-class PayloadValidator
+class PetPayloadValidator
 {
     /**
      * @throws InvalidArgumentException

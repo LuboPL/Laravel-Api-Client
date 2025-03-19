@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 use App\Action\Registry\RequestActionRegistry;
 use App\Config\ConfigInterface;
 use App\Service\PetPayloadMapper;
-use App\Validator\PayloadValidator;
+use App\Validator\PetPayloadValidator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,10 +16,10 @@ use Webmozart\Assert\InvalidArgumentException;
 class PetController extends Controller
 {
     public function __construct(
-        private readonly PetPayloadMapper $payloadMapper,
-        private readonly PayloadValidator $payloadValidator,
+        private readonly PetPayloadMapper      $payloadMapper,
+        private readonly PetPayloadValidator   $payloadValidator,
         private readonly RequestActionRegistry $requestActionRegistry,
-        private readonly ConfigInterface $config
+        private readonly ConfigInterface       $config
     )
     {
     }
