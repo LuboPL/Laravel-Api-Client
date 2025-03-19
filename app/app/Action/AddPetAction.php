@@ -19,9 +19,9 @@ class AddPetAction extends AbstractRequestAction
     {
         parent::__construct($config);
     }
-    protected function getAppUri(): string
+    protected function getRouteName(): string
     {
-        return 'pets';
+        return 'pets.store';
     }
 
     protected function getMethod(): string

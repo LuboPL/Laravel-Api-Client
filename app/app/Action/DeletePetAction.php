@@ -9,9 +9,9 @@ use App\Action\Requests\RequestInterface;
 
 class DeletePetAction extends AbstractRequestAction
 {
-    protected function getAppUri(): string
+    protected function getRouteName(): string
     {
-        return 'pets/{pet}';
+        return 'pets.destroy';
     }
 
     protected function getMethod(): string

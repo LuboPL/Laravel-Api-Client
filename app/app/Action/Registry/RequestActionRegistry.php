@@ -7,7 +7,6 @@ use App\Action\AddPetAction;
 use App\Action\DeletePetAction;
 use App\Action\GetPetAction;
 use App\Action\GetPetsByStatusAction;
-use App\Action\IndexAction;
 use App\Action\RequestActionInterface;
 use App\Action\UpdatePetAction;
 use App\Config\ConfigInterface;
@@ -33,7 +32,6 @@ class RequestActionRegistry
     private function registerActions(ConfigInterface $config): void
     {
         $this->actions = [
-            new IndexAction($config),
             new GetPetsByStatusAction($config),
             new GetPetAction($config),
             new AddPetAction($config, $this->payloadMapper),

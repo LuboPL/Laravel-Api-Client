@@ -9,9 +9,9 @@ use App\Action\Requests\GetPetsByStatusRequest;
 
 class GetPetsByStatusAction extends AbstractRequestAction
 {
-    protected function getAppUri(): string
+    protected function getRouteName(): string
     {
-        return 'pets';
+        return 'pets.index';
     }
 
     protected function getMethod(): string

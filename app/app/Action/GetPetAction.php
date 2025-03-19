@@ -9,9 +9,9 @@ use App\Action\Requests\RequestInterface;
 
 class GetPetAction extends AbstractRequestAction
 {
-    protected function getAppUri(): string
+    protected function getRouteName(): string
     {
-        return 'pets/{pet}/edit';
+        return 'pets.edit';
     }
 
     protected function getMethod(): string

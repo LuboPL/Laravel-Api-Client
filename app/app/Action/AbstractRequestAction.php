@@ -12,12 +12,13 @@ abstract class AbstractRequestAction implements RequestActionInterface
     {
     }
 
-    abstract protected function getAppUri(): string;
+    abstract protected function getRouteName(): string;
     abstract protected function getMethod(): string;
 
     public function matches(Request $request): bool
     {
-        return $request->route()->uri() === $this->getAppUri() &&
+        $request->uri()->path();
+        return $request->route()->getName() === $this->getRouteName() &&
             $request->method() === $this->getMethod();
     }
 }

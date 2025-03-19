@@ -19,9 +19,9 @@ class UpdatePetAction extends AbstractRequestAction
     {
         parent::__construct($config);
     }
-    protected function getAppUri(): string
+    protected function getRouteName(): string
     {
-        return 'pets/{pet}';
+        return 'pets.update';
     }
 
     protected function getMethod(): string
