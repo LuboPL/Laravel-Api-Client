@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action;
+namespace App\Actions;
 
-use App\Action\Requests\RequestInterface;
+use App\Actions\Requests\RequestInterface;
 use Illuminate\Http\Request;
 
 interface RequestActionInterface

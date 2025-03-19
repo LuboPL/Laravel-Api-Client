@@ -1,14 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action\Registry;
+namespace App\Actions\Registry;
 
-use App\Action\AddPetAction;
-use App\Action\DeletePetAction;
-use App\Action\GetPetAction;
-use App\Action\GetPetsByStatusAction;
-use App\Action\RequestActionInterface;
-use App\Action\UpdatePetAction;
+use App\Actions\AddPetAction;
+use App\Actions\DeletePetAction;
+use App\Actions\GetPetAction;
+use App\Actions\GetPetsByStatusAction;
+use App\Actions\RequestActionInterface;
+use App\Actions\UpdatePetAction;
+use App\Actions\UpdatePetWithFormDataAction;
+use App\Actions\UploadPetImageAction;
 use App\Config\ConfigInterface;
 use App\Exception\PetStoreException;
 use App\Service\PetPayloadMapper;
@@ -37,6 +39,8 @@ class RequestActionRegistry
             new AddPetAction($config, $this->payloadMapper),
             new UpdatePetAction($config, $this->payloadMapper),
             new DeletePetAction($config),
+            new UploadPetImageAction($config),
+            new UpdatePetWithFormDataAction($config)
         ];
     }
 

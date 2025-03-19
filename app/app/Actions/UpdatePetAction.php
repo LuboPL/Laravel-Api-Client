@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action;
+namespace App\Actions;
 
-use App\Action\Requests\AddNewPetRequest;
+use App\Actions\Requests\UpdatePetRequest;
 use App\Config\ConfigInterface;
 use App\Service\PetPayloadMapper;
 use Illuminate\Http\Request;
-use App\Action\Requests\RequestInterface;
+use App\Actions\Requests\RequestInterface;
 use Random\RandomException;
 
-class AddPetAction extends AbstractRequestAction
+class UpdatePetAction extends AbstractRequestAction
 {
     public function __construct(
         ConfigInterface $config,
@@ -21,12 +21,12 @@ class AddPetAction extends AbstractRequestAction
     }
     protected function getRouteName(): string
     {
-        return 'pets.store';
+        return 'pets.update';
     }
 
     protected function getMethod(): string
     {
-        return 'POST';
+        return 'PUT';
     }
 
     /**
@@ -34,7 +34,7 @@ class AddPetAction extends AbstractRequestAction
      */
     public function createRequest(Request $request): RequestInterface
     {
-        return new AddNewPetRequest(
+        return new UpdatePetRequest(
             $this->config->getApiUrl(),
             $this->config->getEndpointFindByStatus(),
             $this->getData($request),

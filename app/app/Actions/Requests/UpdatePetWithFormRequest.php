@@ -1,14 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action\Requests;
+namespace App\Actions\Requests;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
-readonly class UpdatePetRequest implements RequestInterface
+readonly class UpdatePetWithFormRequest implements RequestInterface
 {
     public function __construct(
+        private int $petId,
         private string $apiUrl,
         private string $status,
         private array $data
@@ -16,14 +18,17 @@ readonly class UpdatePetRequest implements RequestInterface
     {
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function create(): Response
     {
-        return Http::put($this->apiUrl, $this->data);
+        return Http::asForm()->post($this->getUri(), $this->data);
     }
 
     public function getUri(): string
     {
-        return $this->apiUrl;
+        return sprintf('%s/%s', $this->apiUrl, $this->petId);
     }
 
     public function getStatus(): string

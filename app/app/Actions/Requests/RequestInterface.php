@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action\Requests;
+namespace App\Actions\Requests;
 
 use App\Exception\PetStoreException;
 use Illuminate\Http\Client\Response;

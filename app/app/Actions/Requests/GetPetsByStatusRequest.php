@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action\Requests;
+namespace App\Actions\Requests;
 
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;

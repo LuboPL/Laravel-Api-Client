@@ -1,31 +1,30 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action;
+namespace App\Actions;
 
-use App\Action\Requests\DeletePetRequest;
+use App\Actions\Requests\GetPetRequest;
 use Illuminate\Http\Request;
-use App\Action\Requests\RequestInterface;
+use App\Actions\Requests\RequestInterface;
 
-class DeletePetAction extends AbstractRequestAction
+class GetPetAction extends AbstractRequestAction
 {
     protected function getRouteName(): string
     {
-        return 'pets.destroy';
+        return 'pets.edit';
     }
 
     protected function getMethod(): string
     {
-        return 'DELETE';
+        return 'GET';
     }
 
     public function createRequest(Request $request): RequestInterface
     {
-        return new DeletePetRequest(
+        return new GetPetRequest(
             (int)$request->route()->parameter('pet'),
             $this->config->getApiUrl(),
-            $request->get('status') ?? '',
-            $this->config->getApiKey()
+            $request->get('status') ?? ''
         );
     }
 }

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action;
+namespace App\Actions;
 
 use Illuminate\Http\Request;
-use App\Action\Requests\RequestInterface;
-use App\Action\Requests\GetPetsByStatusRequest;
+use App\Actions\Requests\RequestInterface;
+use App\Actions\Requests\GetPetsByStatusRequest;
 
 class GetPetsByStatusAction extends AbstractRequestAction
 {

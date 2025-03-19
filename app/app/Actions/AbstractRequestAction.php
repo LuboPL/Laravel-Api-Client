@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Action;
+namespace App\Actions;
 
 use App\Config\ConfigInterface;
 use Illuminate\Http\Request;

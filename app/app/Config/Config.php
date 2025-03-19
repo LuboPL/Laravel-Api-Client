@@ -5,7 +5,6 @@ namespace App\Config;
 
 class Config implements ConfigInterface
 {
-
     public function getApiKey(): string
     {
         return self::API_KEY;

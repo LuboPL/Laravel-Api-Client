@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Action\Registry\RequestActionRegistry;
+use App\Actions\Registry\RequestActionRegistry;
 use App\Config\ConfigInterface;
 use App\Service\PetPayloadMapper;
 use App\Validator\PetPayloadValidator;
@@ -138,5 +138,49 @@ class PetController extends Controller
 
         return back()
             ->with('error', $response->body());
+    }
+
+    public function uploadImage(Request $request): RedirectResponse
+    {
+        try {
+            $action = $this->requestActionRegistry->findAction($request);
+            $request = $action->createRequest($request);
+            $response = $request->create();
+
+            if ($response->successful()) {
+                return redirect()
+                    ->route('pets.index')
+                    ->with('success', 'Image uploaded successfully!');
+            }
+
+            return back()
+                ->with('error', $response->body());
+
+        } catch (InvalidArgumentException|\Throwable $exception) {
+            return back()
+                ->with('error', $exception->getMessage());
+        }
+    }
+
+    public function updateWithForm(Request $request): RedirectResponse
+    {
+        try {
+            $action = $this->requestActionRegistry->findAction($request);
+            $request = $action->createRequest($request);
+            $response = $request->create();
+
+            if ($response->successful()) {
+                return redirect()
+                    ->route('pets.index')
+                    ->with('success', 'Updated with form data successfully!');
+            }
+
+            return back()
+                ->with('error', $response->body());
+
+        } catch (InvalidArgumentException|\Throwable $exception) {
+            return back()
+                ->with('error', $exception->getMessage());
+        }
     }
 }
