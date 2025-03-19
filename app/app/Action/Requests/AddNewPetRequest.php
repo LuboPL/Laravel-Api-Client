@@ -1,15 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Http\Requests;
+namespace App\Action\Requests;
 
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
-readonly class UpdatePetRequest implements RequestInterface
+readonly class AddNewPetRequest implements RequestInterface
 {
     public function __construct(
-        private string $method,
         private string $apiUrl,
         private string $status,
         private array $data
@@ -19,12 +18,7 @@ readonly class UpdatePetRequest implements RequestInterface
 
     public function create(): Response
     {
-        return Http::put($this->apiUrl, $this->data);
-    }
-
-    public function getMethod(): string
-    {
-        return $this->method;
+        return Http::post($this->apiUrl, $this->data);
     }
 
     public function getUri(): string
@@ -37,3 +31,4 @@ readonly class UpdatePetRequest implements RequestInterface
         return $this->status;
     }
 }
+

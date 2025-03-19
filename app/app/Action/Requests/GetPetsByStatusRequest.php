@@ -1,15 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Http\Requests;
+namespace App\Action\Requests;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
 
 readonly class GetPetsByStatusRequest implements RequestInterface
 {
     public function __construct(
-        private string $method,
         private string $apiUrl,
         private string $apiEndpoint,
         private string $status
@@ -23,11 +22,6 @@ readonly class GetPetsByStatusRequest implements RequestInterface
             $this->getUri(),
             ['status' => $this->status]
         );
-    }
-
-    public function getMethod(): string
-    {
-        return $this->method;
     }
 
     public function getUri(): string

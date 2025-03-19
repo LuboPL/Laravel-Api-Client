@@ -9,7 +9,7 @@ use App\Models\Tag;
 use Illuminate\Http\Client\Response;
 use Random\RandomException;
 
-class PayloadMapper
+class PetPayloadMapper
 {
     /**
      * @throws RandomException

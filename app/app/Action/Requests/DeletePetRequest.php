@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Http\Requests;
+namespace App\Action\Requests;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
@@ -11,7 +11,6 @@ readonly class DeletePetRequest implements RequestInterface
 {
     public function __construct(
         private int $petId,
-        private string $method,
         private string $apiUrl,
         private string $status,
         private string $apiKey
@@ -26,11 +25,6 @@ readonly class DeletePetRequest implements RequestInterface
     {
         return Http::withHeaders(['api_key' => $this->apiKey])
             ->delete($this->getUri());
-    }
-
-    public function getMethod(): string
-    {
-        return $this->method;
     }
 
     public function getUri(): string

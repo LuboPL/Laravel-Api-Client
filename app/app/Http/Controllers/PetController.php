@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Action\Registry\RequestActionRegistry;
 use App\Config\ConfigInterface;
-use App\Service\Factory\RequestFactoryInterface;
-use App\Service\PayloadMapper;
+use App\Service\PetPayloadMapper;
 use App\Validator\PayloadValidator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -16,9 +16,9 @@ use Webmozart\Assert\InvalidArgumentException;
 class PetController extends Controller
 {
     public function __construct(
-        private readonly PayloadMapper $payloadMapper,
+        private readonly PetPayloadMapper $payloadMapper,
         private readonly PayloadValidator $payloadValidator,
-        private readonly RequestFactoryInterface $petStoreRequest,
+        private readonly RequestActionRegistry $requestActionRegistry,
         private readonly ConfigInterface $config
     )
     {
@@ -27,7 +27,8 @@ class PetController extends Controller
     public function index(Request $request): View|RedirectResponse
     {
         try {
-            $request = $this->petStoreRequest->create($request);
+            $action = $this->requestActionRegistry->findAction($request);
+            $request = $action->createRequest($request);
             $response = $request->create();
             $pets = $this->payloadMapper->mapPetsFromResponse($response);
 
@@ -52,7 +53,8 @@ class PetController extends Controller
     {
         try {
             $this->payloadValidator->validateNewPetPayload($request);
-            $request = $this->petStoreRequest->create($request);
+            $action = $this->requestActionRegistry->findAction($request);
+            $request = $action->createRequest($request);
             $response = $request->create();
 
             if (false === $response->successful()) {
@@ -73,7 +75,8 @@ class PetController extends Controller
     public function edit(Request $request): mixed
     {
         try {
-            $request = $this->petStoreRequest->create($request);
+            $action = $this->requestActionRegistry->findAction($request);
+            $request = $action->createRequest($request);
             $response = $request->create();
             if ($response->successful()) {
                 return view(
@@ -98,8 +101,8 @@ class PetController extends Controller
     public function update(Request $request): RedirectResponse
     {
         try {
-            $this->payloadValidator->validateUpdatedPetPayload($request);
-            $request = $this->petStoreRequest->create($request);
+            $action = $this->requestActionRegistry->findAction($request);
+            $request = $action->createRequest($request);
             $response = $request->create();
 
             if ($response->successful()) {
@@ -120,7 +123,8 @@ class PetController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         try {
-            $request = $this->petStoreRequest->create($request);
+            $action = $this->requestActionRegistry->findAction($request);
+            $request = $action->createRequest($request);
             $response = $request->create();
             if ($response->successful()) {
                 return redirect()
