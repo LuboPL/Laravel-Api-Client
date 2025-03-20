@@ -8,15 +8,17 @@ RUN apt-get update && apt-get install -y \
     docker-php-ext-enable xdebug
 
 COPY conf.d/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
-
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-COPY entrypoint.sh /usr/local/bin/
 
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /var/www/project
-ENV PORT=9001
+
+ENV PORT=9000
+
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]
