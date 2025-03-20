@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Webmozart\Assert\InvalidArgumentException;
 
-class PetController extends Controller
+class PetController
 {
     public function __construct(
         private readonly PetPayloadMapper      $payloadMapper,
