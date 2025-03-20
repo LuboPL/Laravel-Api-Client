@@ -1,6 +1,6 @@
 services:
   app:
-    container_name: php
+    container_name: laravel_php
     build:
       context: ./php
       dockerfile: Dockerfile
@@ -11,15 +11,14 @@ services:
     environment:
       - XDEBUG_MODE=debug
       - DATABASE_URL=mysql://root@mysql:3306/laravel_db
-    ports:
-      - "9001:9001"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
       mysql:
         condition: service_healthy
+
   nginx:
-    container_name: nginx
+    container_name: laravel_nginx
     image: nginx:latest
     volumes:
       - ./app/public:/var/www/project/public:ro
@@ -30,8 +29,9 @@ services:
       - app-network
     depends_on:
       - app
+
   mysql:
-    container_name: mysql
+    container_name: laravel_mysql
     image: mysql:8.0
     environment:
       MYSQL_INNODB_BUFFER_POOL_SIZE: 512M
@@ -50,13 +50,15 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "--user=root", "--silent" ]
+      test: ["CMD", "mysqladmin", "ping", "--user=root", "--silent"]
       interval: 10s
       timeout: 45s
       retries: 25
       start_period: 15s
+
 volumes:
   mysql_data:
+
 networks:
   app-network:
     driver: bridge
