@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 
 use App\Actions\Registry\RequestActionRegistry;
 use App\Config\ConfigInterface;
+use App\Exception\PetStoreException;
 use App\Service\PetPayloadMapper;
 use App\Validator\PetPayloadValidator;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,15 +29,13 @@ class PetController extends Controller
     public function index(Request $request): View|RedirectResponse
     {
         try {
-            $action = $this->requestActionRegistry->findAction($request);
-            $request = $action->createRequest($request);
-            $response = $request->create();
+            $response = $this->getResponse($request);
             $pets = $this->payloadMapper->mapPetsFromResponse($response);
 
             return view('pets.index', [
                 'pets' => $pets,
                 'availableStatuses' => $this->config->getAvailableStatuses(),
-                'selectedStatus' => $request->getStatus()
+                'selectedStatus' => $request->input('status', 'available')
             ]);
         } catch (\Throwable $exception) {
             return redirect()
@@ -53,9 +53,7 @@ class PetController extends Controller
     {
         try {
             $this->payloadValidator->validateNewPetPayload($request);
-            $action = $this->requestActionRegistry->findAction($request);
-            $request = $action->createRequest($request);
-            $response = $request->create();
+            $response = $this->getResponse($request);
 
             if (false === $response->successful()) {
                 return redirect()
@@ -75,9 +73,8 @@ class PetController extends Controller
     public function edit(Request $request): mixed
     {
         try {
-            $action = $this->requestActionRegistry->findAction($request);
-            $request = $action->createRequest($request);
-            $response = $request->create();
+            $response = $this->getResponse($request);
+
             if ($response->successful()) {
                 return view(
                     'pets.create',
@@ -101,9 +98,7 @@ class PetController extends Controller
     public function update(Request $request): RedirectResponse
     {
         try {
-            $action = $this->requestActionRegistry->findAction($request);
-            $request = $action->createRequest($request);
-            $response = $request->create();
+            $response = $this->getResponse($request);
 
             if ($response->successful()) {
                 return redirect()
@@ -123,9 +118,8 @@ class PetController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         try {
-            $action = $this->requestActionRegistry->findAction($request);
-            $request = $action->createRequest($request);
-            $response = $request->create();
+            $response = $this->getResponse($request);
+
             if ($response->successful()) {
                 return redirect()
                     ->route('pets.index')
@@ -143,9 +137,7 @@ class PetController extends Controller
     public function uploadImage(Request $request): RedirectResponse
     {
         try {
-            $action = $this->requestActionRegistry->findAction($request);
-            $request = $action->createRequest($request);
-            $response = $request->create();
+            $response = $this->getResponse($request);
 
             if ($response->successful()) {
                 return redirect()
@@ -165,9 +157,7 @@ class PetController extends Controller
     public function updateWithForm(Request $request): RedirectResponse
     {
         try {
-            $action = $this->requestActionRegistry->findAction($request);
-            $request = $action->createRequest($request);
-            $response = $request->create();
+            $response = $this->getResponse($request);
 
             if ($response->successful()) {
                 return redirect()
@@ -182,5 +172,15 @@ class PetController extends Controller
             return back()
                 ->with('error', $exception->getMessage());
         }
+    }
+
+    /**
+     * @throws PetStoreException
+     */
+    private function getResponse(Request $request): Response
+    {
+        $action = $this->requestActionRegistry->findAction($request);
+        $request = $action->createRequest($request);
+        return $request->create();
     }
 }
