@@ -98,6 +98,7 @@ class PetController
     public function update(Request $request): RedirectResponse
     {
         try {
+            $this->payloadValidator->validateUpdatedPetPayload($request);
             $response = $this->getResponse($request);
 
             if ($response->successful()) {

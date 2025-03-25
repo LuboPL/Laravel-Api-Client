@@ -17,7 +17,6 @@ abstract class AbstractRequestAction implements RequestActionInterface
 
     public function matches(Request $request): bool
     {
-        $request->uri()->path();
         return $request->route()->getName() === $this->getRouteName() &&
             $request->method() === $this->getMethod();
     }
